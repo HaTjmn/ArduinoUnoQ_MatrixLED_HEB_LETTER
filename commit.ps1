@@ -12,8 +12,6 @@ param(
     [string]$Message
 )
 
-$RemoteUrl = "https://github.com/HaTjmn/ArduinoUnoQ_MatrixLED_HEB_LETTER.git"
-
 Set-Location -Path $PSScriptRoot
 
 if (-not (Test-Path ".git")) {
@@ -23,8 +21,34 @@ if (-not (Test-Path ".git")) {
 
 $existingRemotes = git remote
 if ($existingRemotes -notcontains "origin") {
-    git remote add origin $RemoteUrl
-    Write-Host "Connected to GitHub repo: $RemoteUrl" -ForegroundColor Cyan
+    $newUrl = Read-Host "No GitHub repo connected yet. Paste its URL (leave empty to skip)"
+    if ($newUrl) {
+        git remote add origin $newUrl
+        Write-Host "Connected to GitHub repo: $newUrl" -ForegroundColor Cyan
+    }
+} else {
+    $currentUrl = git remote get-url origin
+    Write-Host "Currently connected to: $currentUrl" -ForegroundColor DarkGray
+    $change = Read-Host "Change the GitHub repo link? (y/N)"
+    if ($change -eq "y" -or $change -eq "Y") {
+        $newUrl = Read-Host "New GitHub repo URL"
+        if ($newUrl) {
+            git remote set-url origin $newUrl
+            Write-Host "Now connected to: $newUrl" -ForegroundColor Cyan
+        } else {
+            Write-Host "No URL given - keeping the current one." -ForegroundColor Yellow
+        }
+    }
+}
+
+$newBranch = Read-Host "Create a new branch? (y/N)"
+if ($newBranch -eq "y" -or $newBranch -eq "Y") {
+    $branchName = Read-Host "New branch name"
+    if ($branchName) {
+        git checkout -b $branchName
+    } else {
+        Write-Host "No name given - staying on current branch." -ForegroundColor Yellow
+    }
 }
 
 git add -A
