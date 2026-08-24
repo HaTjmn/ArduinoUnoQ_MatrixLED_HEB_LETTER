@@ -642,18 +642,21 @@ def stop_animation():
 def write_sentence(payload: dict):
     """Spell out a Hebrew sentence on the LED matrix using pre-drawn letter frames.
 
-    Payload: {text: str}
+    Payload: {text: str, loop: bool}
 
     The sketch (write_sentence provider) maps each Hebrew letter to a frame
     from Animation.h and plays them in sequence. Letters with no drawn frame
-    (e.g. Alef) are silently skipped on the board.
+    (e.g. Alef) are silently skipped on the board. When loop is true, the
+    sentence keeps scrolling repeatedly until stop_animation is called.
     """
     text = payload.get('text', '')
+    loop = bool(payload.get('loop', False))
     if not text:
         return {'error': 'no text provided'}
     try:
+        Bridge.call("set_scroll_loop", loop)
         Bridge.call("write_sentence", text)
-        logger.info(f"write_sentence called on board: text={text!r}")
+        logger.info(f"write_sentence called on board: text={text!r}, loop={loop}")
         return {'ok': True}
     except Exception as e:
         logger.warning(f"Failed to request write_sentence: {e}")

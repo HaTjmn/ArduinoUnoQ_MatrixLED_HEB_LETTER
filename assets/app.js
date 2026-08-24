@@ -561,6 +561,7 @@ if (uploadAlphabetBtn && alphabetFileInput) {
 
 const sentenceInput = document.getElementById('sentence-input');
 const writeSentenceBtn = document.getElementById('write-sentence-btn');
+const sentenceLoopCheckbox = document.getElementById('sentence-loop-checkbox');
 if (writeSentenceBtn) {
   writeSentenceBtn.addEventListener('click', async () => {
     const text = sentenceInput ? sentenceInput.value.trim() : '';
@@ -569,13 +570,14 @@ if (writeSentenceBtn) {
       setTimeout(hideError, 3000);
       return;
     }
+    const loop = sentenceLoopCheckbox ? sentenceLoopCheckbox.checked : false;
     try {
       const data = await fetchWithHandling(
         '/write_sentence',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text }),
+          body: JSON.stringify({ text, loop }),
         },
         'json',
         'write sentence'

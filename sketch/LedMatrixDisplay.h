@@ -17,4 +17,5 @@ public:
   void playAnimation();
   void stopAnimation();
   void writeSentence(const String& text);
+  void setScrollLoop(bool loop);
 };

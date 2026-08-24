@@ -69,6 +69,7 @@ static uint8_t scrollBuffer[MATRIX_ROWS][SCROLL_MAX_COLUMNS];
 static int scrollContentWidth = 0;
 static int scrollWindowStart = 0;
 static bool scrollIsActive = false;
+static bool scrollLoopEnabled = false;
 static unsigned long nextScrollTime = 0;
 
 // -----------------------------------------------------------------------------
@@ -339,6 +340,12 @@ void LedMatrixDisplay::writeSentence(const String& text) {
   k_mutex_unlock(&anim_mtx);
 }
 
+void LedMatrixDisplay::setScrollLoop(bool loop) {
+  k_mutex_lock(&anim_mtx, K_FOREVER);
+  scrollLoopEnabled = loop;
+  k_mutex_unlock(&anim_mtx);
+}
+
 // -----------------------------------------------------------------------------
 // Buffered animation engine
 // -----------------------------------------------------------------------------
@@ -405,6 +412,11 @@ static bool hasScrollFinished() {
 }
 
 static void finishScrolling() {
+  if (scrollLoopEnabled) {
+    // Restart from fully off-screen, same as the initial startScrolling() state.
+    scrollWindowStart = scrollContentWidth;
+    return;
+  }
   stopScrollingText();
   matrix.clear();
 }
