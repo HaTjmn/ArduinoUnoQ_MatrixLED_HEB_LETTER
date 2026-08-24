@@ -20,14 +20,24 @@ if (-not (Test-Path ".git")) {
 
 git add -A
 
+$staged = git diff --cached --name-only
+if (-not $staged) {
+    Write-Host "Nothing to commit - working tree clean." -ForegroundColor Yellow
+    Read-Host "Press Enter to close"
+    exit 0
+}
+
+Write-Host "Changed files:" -ForegroundColor Cyan
+git diff --cached --name-status
+
+if (-not $Message) {
+    $Message = Read-Host "Commit message (leave empty for auto timestamp)"
+}
+
 if (-not $Message) {
     $Message = "Update " + (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
 }
 
-$staged = git diff --cached --name-only
-if (-not $staged) {
-    Write-Host "Nothing to commit - working tree clean." -ForegroundColor Yellow
-    exit 0
-}
-
 git commit -m $Message
+
+Read-Host "Press Enter to close"
