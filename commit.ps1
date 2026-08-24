@@ -51,6 +51,17 @@ if ($answer -eq "y" -or $answer -eq "Y") {
     $branch = git branch --show-current
     Write-Host "Pushing branch '$branch' to origin..." -ForegroundColor Cyan
     git push -u origin $branch
+
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host ""
+        Write-Host "Push was rejected - the GitHub repo has content that doesn't match your local history (e.g. an auto-created README)." -ForegroundColor Yellow
+        $force = Read-Host "Overwrite the GitHub repo with your local version instead? This discards whatever is currently there. (y/N)"
+        if ($force -eq "y" -or $force -eq "Y") {
+            git push -u origin $branch --force
+        } else {
+            Write-Host "Skipped - nothing was pushed." -ForegroundColor Yellow
+        }
+    }
 } else {
     Write-Host "Skipped push - commit stayed local only." -ForegroundColor Yellow
 }
