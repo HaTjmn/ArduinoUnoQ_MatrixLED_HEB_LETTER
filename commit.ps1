@@ -51,6 +51,34 @@ if ($newBranch -eq "y" -or $newBranch -eq "Y") {
     }
 }
 
+$pullAnswer = Read-Host "Update local code to match GitHub first? (y/N)"
+if ($pullAnswer -eq "y" -or $pullAnswer -eq "Y") {
+    $branch = git branch --show-current
+    $dirty = git status --porcelain
+    $stashed = $false
+    if ($dirty) {
+        Write-Host "Stashing your local changes temporarily..." -ForegroundColor Cyan
+        git stash push -u -m "auto-stash before pull" | Out-Null
+        $stashed = $true
+    }
+
+    Write-Host "Pulling latest from origin/$branch..." -ForegroundColor Cyan
+    git fetch origin
+    git pull origin $branch
+
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Pull failed or had conflicts - check the messages above before continuing." -ForegroundColor Red
+    }
+
+    if ($stashed) {
+        Write-Host "Restoring your local changes..." -ForegroundColor Cyan
+        git stash pop
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "Could not auto-restore your changes cleanly (conflict). They are not lost - run 'git stash list' / 'git stash pop' manually, or ask Claude for help." -ForegroundColor Red
+        }
+    }
+}
+
 git add -A
 
 $staged = git diff --cached --name-only
